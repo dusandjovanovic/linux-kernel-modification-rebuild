@@ -210,6 +210,35 @@ Promena atributa deskriptora procesa `static_prio` direktno utiče na momentalnu
 
 Sa druge strane, promena atributa `policy` i setovanje vrednosti konstantom `SCHED_RR` će dovesti do toga da proces postane real-time kategorije i uvek će imati prednost u odnosu na sve ostale "obične" procese. Kao pto je već rečeno, ovo je uslovljeno parametrom modula `process_realtime` i ako je izostavljen neće biti primenjeno *(podrazumevana vrednost parametra je false)*. Na kraju, da li će doći do **inkrementiranja ili dekrementiranja prioriteta** zavisi od parametra modula `process_higher_priority` *(podrazumevana vrednost parametra je true)*.
 
-### Ilustracija rezultata 
+### Ilustracija rezultata
+
+Na primeru je pokrenut proces Firefox pretraživača koji je pritom dobio PID 3119. Kao što se može videti na prvoj slici, `nice` vrednost ovog procesa u koloni NI je 0. Treba pozvati kernel modul sa parametrom `process_id` koji odgovara ovom PID-u i pritom smanjiti prioritet procesa za jedan odnosno *dekrementirati prioritet*.
+
+![alt text][screenshot-before]
+
+[screenshot-before]: meta/screenshot-before.png
+
+Do ovog rezultata dolazi se učitavanjem modula kao:
+
+`sudo insmod kernel_module.ko process_id=3119 process_higher_priority=0 process_realtime=0 process_siblings=0`
+
+Rezultat se može videti na sledećoj slici. Po parametrima modula, promenama neće biti zahvećeni procesi "braća/sestre", prioritet će se smanjiti za jedan i proces neće dobiti real-time karakteristike.
+
+Log kernela generisan od strane modula sadrži:
+
+```
+[  257.518601] kernel_module: loading out-of-tree module taints kernel.
+[  257.518646] kernel_module: module verification failed: signature and/or required key missing - tainting kernel
+[  257.519114] Commiting changes for process w/ pid 3119
+[  257.519123] Changing priority level from 120 for pID(3119)
+[  257.519124] Commited 121 priority level for pID(3119)
+[  308.887922] Unloading module
+```
+
+![alt text][screenshot-after]
+
+[screenshot-after]: meta/screenshot-after.png
+
+Može se videti da je `nice` vrednost procesa u koloni NI sada za jedan veća - odnosno priotitet procesa je smanjen.
 
 ## Sistemski poziv za promenu prioriteta
