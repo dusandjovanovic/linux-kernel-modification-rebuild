@@ -242,3 +242,56 @@ Log kernela generisan od strane modula sadrži:
 Može se videti da je `nice` vrednost procesa u koloni NI sada za jedan veća - odnosno priotitet procesa je smanjen.
 
 ## Sistemski poziv za promenu prioriteta
+
+Sistemski poziv je potrebno integrisati u izvorni kod samog kernela, a zatim rebuild-ovati kernel. Pristup problemu promene prioriteta i realizacija su identični. Razmatrana je trenutna stabilna verzija kernela, odnosno verzija `5.4.12`. Sistemski poziv `sys_change_priority` ima navedeni potpis funkije. Argumenti poziva imaju isto značenje i imena kao u slučaju modula.
+
+`asmlinkage long sys_change_priority(int process_id, int process_higher_priority, bool process_siblings, bool process_realtime)`
+
+Takođe, neophodno je direktorijum u kome je izvorni fajl sa definicijom sistemskog poziva uključiti u procesu ponovnog rebuild-ovanja kernela.
+
+```c
+ifeq ($(KBUILD_EXTMOD),)
+core-y		+= kernel/ certs/ mm/ fs/ ipc/ security/ crypto/ block/ sys_change_priority/
+```
+
+Potpis funkcije koja će se pozivati kao sistemski poziv treba dodati include zaglavlju `include/linux/syscalls.h`:
+
+```c
+...
+asmlinkage long sys_old_mmap(struct mmap_arg_struct __user *arg);
+asmlinkage long sys_ni_syscall(void);
+asmlinkage long sys_change_priority(int process_id, int process_higher_priority, bool process_siblings, bool process_realtime);
+
+#endif
+```
+
+Na kraju, za ciljnu arhitekturu treba dodati elemenat u tabelu sistemskih poziva `arch/x86/entry/syscalls.tbl`:
+
+```c
+...
+433	common	fspick			__x64_sys_fspick
+434	common	pidfd_open		__x64_sys_pidfd_open
+435	common	clone3			__x64_sys_clone3/ptregs
+436	64	sys_change_priority	sys_change_priority
+```
+
+Nakon promene `menuconfig-a` kernel se može rebuild-ovati sa još jednim sistemskim pozivom u api-u.
+
+### Rebuild kernela
+
+`make` komanda za pokretanje procesa kompajliranja.
+
+`make modules_install install` komanda za instalaciju kernela.
+
+`shutdown -r now` za ponovno podizanje sistema. Nakon pokretanja, kernel je promenjen i može se koristiti sistemski poziv.
+
+### Pozivanje api-a kernela
+
+Na osnovu broja 436 sistemskog poziva, može se formirati makro koji se zatim koristi za pozivanje. U kodu je dat primer pokretanja sistemskog poziva za proces sa PID-om 3117 koji će uvećati njegov prioritet, imaće isti uticaj na sve procese "braću/sestre" i neće promeniti tip procesa u real-time proces.
+
+```c
+#define __NR_sys_change_priority 436
+__syscall113(long, sys_change_priority, int, process_id, bool, process_higher_priority , bool, process_siblings, bool, process_realtime)
+
+sys_change_priority(3117, true, true, false);
+```
