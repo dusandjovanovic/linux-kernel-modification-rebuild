@@ -289,7 +289,9 @@ Nakon promene `menuconfig-a` kernel se može rebuild-ovati sa još jednim sistem
 
 ### Pozivanje api-a kernela
 
-Na osnovu broja 436 sistemskog poziva, može se formirati makro koji se zatim koristi za pozivanje. U kodu je dat primer pokretanja sistemskog poziva za proces sa PID-om 3117 koji će uvećati njegov prioritet, imaće isti uticaj na sve procese "braću/sestre" i neće promeniti tip procesa u real-time proces.
+Na osnovu broja 436 sistemskog poziva, može se formirati makro koji se zatim koristi za pozivanje.
+
+U kodu je dat primer pokretanja sistemskog poziva za proces sa PID-om 3117 koji će uvećati njegov prioritet, imaće isti uticaj na sve procese "braću/sestre" i neće promeniti tip procesa u real-time proces.
 
 ```c
 #define __NR_sys_change_priority 436
