@@ -1,8 +1,8 @@
 # Modifikacija i rebuild-ovanje Linux kernela
 
-Zadatak: Modifikuje se prioritet procesa i parametri raspoređivanja procesa, tako da se utiče na algoritam raspoređivanja za proces sa zadatim PID-om i eventualno grupu procesa "braće/sestara".
+**Zadatak:** Modifikuje se prioritet procesa i parametri raspoređivanja procesa, tako da se utiče na algoritam raspoređivanja za proces sa zadatim PID-om i eventualno grupu procesa "braće/sestara".
 
-## Upravljanje i rasporedjivanje procesa
+## Raspoređivanje procesa (scheduling)
 
 Upravljanje izvršavanjem procesa je jedan od zadataka kernela. Kao primer, koristiće se trenutna stabilna verzija 5.4.12.
 
