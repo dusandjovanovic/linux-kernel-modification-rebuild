@@ -243,9 +243,11 @@ Može se videti da je `nice` vrednost procesa u koloni NI sada za jedan veća - 
 
 ## Sistemski poziv za promenu prioriteta
 
-Sistemski poziv je potrebno integrisati u izvorni kod samog kernela, a zatim rebuild-ovati kernel. Pristup problemu promene prioriteta i realizacija su identični. Razmatrana je trenutna stabilna verzija kernela, odnosno verzija `5.4.12`. Sistemski poziv `sys_change_priority` ima navedeni potpis funkije. Argumenti poziva imaju isto značenje i imena kao u slučaju modula.
+Sistemski poziv je potrebno integrisati u izvorni kod samog kernela, a zatim rebuild-ovati kernel. Pristup problemu promene prioriteta i realizacija su identični. Razmatrana je trenutna stabilna verzija kernela, odnosno verzija `5.4.12`.
 
 `asmlinkage long sys_change_priority(int process_id, int process_higher_priority, bool process_siblings, bool process_realtime)`
+
+Sistemski poziv `sys_change_priority` ima navedeni potpis funkije. Argumenti poziva imaju isto značenje i imena kao u slučaju modula. Direktorijum u stablu koda kernela je istog imena kao i sistemski poziv, odnosno nalazi se u `linux-5.4.12/sys_change_priority/`.
 
 Takođe, neophodno je direktorijum u kome je izvorni fajl sa definicijom sistemskog poziva uključiti u procesu ponovnog rebuild-ovanja kernela.
 
