@@ -140,3 +140,76 @@ static inline int normal_prio(struct task_struct *p)
 	return prio;
 }
 ```
+
+## Kernel modul za promenu prioriteta
+
+Izvorni kod modula za promenu prioriteta procesa dat je u direktorijumu `linux-kernel-module`. Nekoliko važnih komandi dato je u nastavku.
+
+`sudo insmod kernel_module.ko process_id=.. process_higher_priority =.. process_siblings =.. process_realtime ..`
+
+Za učitavanje modula potrebno je pozvati `insmod` komandu sa root privilegijama. Takođe treba navesti parametre modula, ako je ovo izostavljeno preuzimaju se podrazumevane vrednosti.
+
+`sudo rmmod kernel_module`
+
+Za brisanje modula potrebno je pozvati `rmmod` komandu.
+
+`dmesg`
+
+Za praćenje rezultata modula potrebno je pozvati `dmesg`. Sve akcije modula ispraćene su u logu kernela.
+
+### Parametri modula
+
+1. **process_id** - PID procesa čiji će se prioritet menjati, ukoliko se ne navede onda je to proces koji se trenutno izvršava
+2. **process_higher_priority** - Da li će proces dobiti za jedan višu ili nižu vrednost prioriteta od trenutne *(podrazumevano true)*
+3. **process_siblings** - Da li će biti promenjen prioritet svih procesa braće/sestara *(podrazumevano false)*
+4. **process_realtime** - Da li će proces pripadati kategoriji real-time procesa *(podrazumevano false)*
+
+### Implementacioni detalji
+
+U kodu koji sledi dat je ključni deo implementacije ovog modula.
+
+```c
+static int __init kernel_module_init(void)
+{
+    struct task_struct* process;
+    process = normalize();
+
+    pr_alert("Commiting changes for process w/ pid %d\n", process->pid);
+    if (process_siblings)
+        pr_alert("Changes will be applied to all siblings of the process\n");
+
+    struct task_struct* task_sibling;
+    struct list_head* task_list;
+
+    list_for_each(task_list, &(process->parent)->children) {
+        task_sibling = list_entry(task_list, struct task_struct, sibling);
+        if (task_sibling->pid == process->pid || process_siblings)
+        {
+            pr_alert("Changing priority level from %d for pID(%d)\n", task_sibling->static_prio, process->pid);
+
+            unsigned int new_static_prio = process_higher_priority ? task_sibling->static_prio + 1 : task_sibling->static_prio - 1;
+            
+            task_sibling->static_prio = new_static_prio;
+            pr_alert("Commited %d priority level for pID(%d)\n", new_static_prio, process->pid);
+            if (process_realtime) {
+                task_sibling->policy = SCHED_RR;
+                pr_alert("Commited SCHED_RR priority policy for pID(%d)\n", process->pid);
+            }
+        }
+    }
+
+    return 0;
+}
+```
+
+Treba, pre svega, pribaviti `task_struct` deskriptore svih procesa nad kojima će se izvršiti promene prioriteta, do ovih deskriptora se dolazi obilaskom liste svih potomaka procesa koji je roditelj onog čije se promene zahtevaju. U zavisnosti od parametra modula `process_siblings` promene će možda biti primenjene na ostale procese, odnosno "braću/sestre".
+
+Važni atributi koje treba menjati su `task_sibling->static_prio` i `task_sibling->policy`. Drugi atribut menja se jedino ako je parametar modula `process_realtime` potvrdan.
+
+Promena atributa deskriptora procesa `static_prio` direktno utiče na momentalnu promenu `nice` vrednosti istog procesa i načina sagledavanja njegovog prioriteta u odnosu na ostale procese od strane kernela.
+
+Sa druge strane, promena atributa `policy` i setovanje vrednosti konstantom `SCHED_RR` će dovesti do toga da proces postane real-time kategorije i uvek će imati prednost u odnosu na sve ostale "obične" procese. Kao pto je već rečeno, ovo je uslovljeno parametrom modula `process_realtime` i ako je izostavljen neće biti primenjeno *(podrazumevana vrednost parametra je false)*. Na kraju, da li će doći do **inkrementiranja ili dekrementiranja prioriteta** zavisi od parametra modula `process_higher_priority` *(podrazumevana vrednost parametra je true)*.
+
+### Ilustracija rezultata 
+
+## Sistemski poziv za promenu prioriteta
