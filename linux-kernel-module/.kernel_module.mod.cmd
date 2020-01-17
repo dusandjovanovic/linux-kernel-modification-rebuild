@@ -1,0 +1,1 @@
+cmd_/home/ubuntu/Desktop/linux-kernel-module/kernel_module.mod := { echo  /home/ubuntu/Desktop/linux-kernel-module/kernel_module.o; echo; } > /home/ubuntu/Desktop/linux-kernel-module/kernel_module.mod
