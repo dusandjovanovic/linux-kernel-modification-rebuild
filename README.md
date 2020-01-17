@@ -166,7 +166,7 @@ Za praćenje rezultata modula potrebno je pozvati `dmesg`. Sve akcije modula isp
 
 ### Implementacioni detalji
 
-U kodu koji sledi dat je ključni deo implementacije ovog modula.
+U kodu koji sledi dat je ključni deo implementacije ovog modula. Celokupan kod kernel modula može se videti u [https://github.com/dusandjovanovic/linux-kernel-modification-rebuild/blob/master/linux-kernel-module/kernel_module.c](https://github.com/dusandjovanovic/linux-kernel-modification-rebuild/blob/master/linux-kernel-module/kernel_module.c). 
 
 ```c
 static int __init kernel_module_init(void)
@@ -243,7 +243,7 @@ Može se videti da je `nice` vrednost procesa u koloni NI sada za jedan veća - 
 
 ## Sistemski poziv za promenu prioriteta
 
-Sistemski poziv je potrebno integrisati u izvorni kod samog kernela, a zatim rebuild-ovati kernel. Pristup problemu promene prioriteta i realizacija su identični. Razmatrana je trenutna stabilna verzija kernela, odnosno verzija `5.4.12`.
+Sistemski poziv je potrebno integrisati u izvorni kod samog kernela, a zatim rebuild-ovati kernel. Pristup problemu promene prioriteta i realizacija su identični. Razmatrana je trenutna stabilna verzija kernela, odnosno verzija `5.4.12`. Kod funkcije koja je integrisana u kernel kao sistemski poziv može se videti u [https://github.com/dusandjovanovic/linux-kernel-modification-rebuild/tree/master/linux-kernel-system-call/sys_change_priority](https://github.com/dusandjovanovic/linux-kernel-modification-rebuild/tree/master/linux-kernel-system-call/sys_change_priority).
 
 `asmlinkage long sys_change_priority(int process_id, int process_higher_priority, bool process_siblings, bool process_realtime)`
 
@@ -281,6 +281,8 @@ Nakon promene `menuconfig-a` kernel se može rebuild-ovati sa još jednim sistem
 
 ### Rebuild kernela
 
+Modifikovani kod kernela sa dodatim sistemskim pozivom nalazi se u [https://github.com/dusandjovanovic/linux-kernel-modification-rebuild/tree/master/linux-5.4.12](https://github.com/dusandjovanovic/linux-kernel-modification-rebuild/tree/master/linux-5.4.12).
+
 `make` komanda za pokretanje procesa kompajliranja.
 
 `make modules_install install` komanda za instalaciju kernela.
@@ -288,6 +290,8 @@ Nakon promene `menuconfig-a` kernel se može rebuild-ovati sa još jednim sistem
 `shutdown -r now` za ponovno podizanje sistema. Nakon pokretanja, kernel je promenjen i može se koristiti sistemski poziv.
 
 ### Pozivanje api-a kernela
+
+Primer sistemskog poziva dat je u [https://github.com/dusandjovanovic/linux-kernel-modification-rebuild/blob/master/linux-kernel-system-call/kernel_call_example.c](https://github.com/dusandjovanovic/linux-kernel-modification-rebuild/blob/master/linux-kernel-system-call/kernel_call_example.c).
 
 Na osnovu broja 436 sistemskog poziva, može se formirati makro koji se zatim koristi za pozivanje.
 
