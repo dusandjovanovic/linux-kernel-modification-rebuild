@@ -13,16 +13,16 @@ struct task_struct {
  volatile long state; /* -1 unrunnable, 0 runnable, >0 stopped */
  void *stack;
  …
- unsigned int flags; /* per process flags */
+ unsigned int flags;
  …
  struct mm_struct *mm;
  …
  pid_t pid;
  pid_t tgid;
  …
- struct task_struct __rcu *real_parent; /* real parent process */
- struct list_head children; /* list of my children */
- struct list_head sibling; /* linkage in my parent's children list */
+ struct task_struct __rcuč
+ struct list_head children;
+ struct list_head sibling;
  …
  int prio, static_prio, normal_prio;
  unsigned int rt_priority;
@@ -162,7 +162,7 @@ Za praćenje rezultata modula potrebno je pozvati `dmesg`. Sve akcije modula isp
 1. **process_id** - PID procesa čiji će se prioritet menjati, ukoliko se ne navede onda je to proces koji se trenutno izvršava
 2. **process_higher_priority** - Da li će proces dobiti za jedan višu ili nižu vrednost prioriteta od trenutne *(podrazumevano true)*
 3. **process_siblings** - Da li će biti promenjen prioritet svih procesa braće/sestara *(podrazumevano false)*
-4. **process_realtime** - Da li će proces pripadati kategoriji real-time procesa *(podrazumevano false)*
+4. **process_realtime** - Da li će proces dobiti polisu Round-robin raspoređivanja real-time procesa *(podrazumevano false)*
 
 ### Implementacioni detalji
 
@@ -208,7 +208,7 @@ Važni atributi koje treba menjati su `task_sibling->static_prio` i `task_siblin
 
 Promena atributa deskriptora procesa `static_prio` direktno utiče na momentalnu promenu `nice` vrednosti istog procesa i načina sagledavanja njegovog prioriteta u odnosu na ostale procese od strane kernela.
 
-Sa druge strane, promena atributa `policy` i setovanje vrednosti konstantom `SCHED_RR` će dovesti do toga da proces postane real-time kategorije i uvek će imati prednost u odnosu na sve ostale "obične" procese. Kao pto je već rečeno, ovo je uslovljeno parametrom modula `process_realtime` i ako je izostavljen neće biti primenjeno *(podrazumevana vrednost parametra je false)*. Na kraju, da li će doći do **inkrementiranja ili dekrementiranja prioriteta** zavisi od parametra modula `process_higher_priority` *(podrazumevana vrednost parametra je true)*.
+Sa druge strane, promena atributa `policy` i setovanje vrednosti konstantom `SCHED_RR` će dovesti do toga da proces dobije polisu raspoređivanja real-time procesa i uvek će imati prednost u odnosu na ostale "obične" procese. Kao što je već rečeno, ovo je uslovljeno parametrom modula `process_realtime` i ukoliko je izostavljen neće biti primenjeno *(podrazumevana vrednost parametra je false)*. Na kraju, da li će doći do **inkrementiranja ili dekrementiranja prioriteta** zavisi od parametra modula `process_higher_priority` *(podrazumevana vrednost parametra je true)*.
 
 ### Ilustracija rezultata
 
@@ -291,11 +291,11 @@ Modifikovani kod kernela sa dodatim sistemskim pozivom nalazi se u [https://gith
 
 ### Pozivanje api-a kernela
 
-Primer sistemskog poziva dat je u [https://github.com/dusandjovanovic/linux-kernel-modification-rebuild/blob/master/linux-kernel-system-call/kernel_call_example.c](https://github.com/dusandjovanovic/linux-kernel-modification-rebuild/blob/master/linux-kernel-system-call/kernel_call_example.c).
+Primer korišćenja sistemskog poziva iz korisničkog procesa dat je u [https://github.com/dusandjovanovic/linux-kernel-modification-rebuild/blob/master/linux-kernel-system-call/kernel_call_example.c](https://github.com/dusandjovanovic/linux-kernel-modification-rebuild/blob/master/linux-kernel-system-call/kernel_call_example.c).
 
 Na osnovu broja 436 sistemskog poziva, može se formirati makro koji se zatim koristi za pozivanje.
 
-U kodu je dat primer pokretanja sistemskog poziva za proces sa PID-om 3117 koji će uvećati njegov prioritet, imaće isti uticaj na sve procese "braću/sestre" i neće promeniti tip procesa u real-time proces.
+U kodu je dat primer pokretanja sistemskog poziva za proces sa PID-om 3117 koji će uvećati njegov prioritet, imaće isti uticaj na sve procese "braću/sestre" i neće promeniti tip polise raspoređivanja u round robin real-time proces.
 
 ```c
 #define __NR_sys_change_priority 436
