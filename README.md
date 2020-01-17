@@ -187,7 +187,7 @@ static int __init kernel_module_init(void)
         {
             pr_alert("Changing priority level from %d for pID(%d)\n", task_sibling->static_prio, process->pid);
 
-            unsigned int new_static_prio = process_higher_priority ? task_sibling->static_prio + 1 : task_sibling->static_prio - 1;
+            unsigned int new_static_prio = process_higher_priority ? task_sibling->static_prio - 1 : task_sibling->static_prio + 1;
             
             task_sibling->static_prio = new_static_prio;
             pr_alert("Commited %d priority level for pID(%d)\n", new_static_prio, process->pid);
