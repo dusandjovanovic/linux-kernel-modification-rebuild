@@ -8,4 +8,6 @@ __syscall113(long, sys_change_priority, int, process_id, bool, process_higher_pr
 
 int main() {
 	sys_change_priority(3117, true, true, false);
+	
+	return 0;
 }
