@@ -295,11 +295,14 @@ Primer korišćenja sistemskog poziva iz korisničkog procesa dat je u [https://
 
 Na osnovu broja 436 sistemskog poziva, može se formirati makro koji se zatim koristi za pozivanje.
 
-U kodu je dat primer pokretanja sistemskog poziva za proces sa PID-om 3117 koji će uvećati njegov prioritet, imaće isti uticaj na sve procese "braću/sestre" i neće promeniti tip polise raspoređivanja u round robin real-time proces.
+U kodu je dat primer pokretanja sistemskog poziva za proces sa PID-om 2620 koji će uvećati njegov prioritet, imaće isti uticaj na sve procese "braću/sestre" i neće promeniti tip polise raspoređivanja u round robin real-time proces.
 
 ```c
-#define __NR_sys_change_priority 436
-__syscall113(long, sys_change_priority, int, process_id, bool, process_higher_priority , bool, process_siblings, bool, process_realtime)
+#include <sys/syscall.h>
+#include <sys/types.h>
 
-sys_change_priority(3117, true, true, false);
+#define __NR_sys_change_priority 436
+
+long __return = syscall(436, 2620, 1, 1, 0);
+...
 ```
