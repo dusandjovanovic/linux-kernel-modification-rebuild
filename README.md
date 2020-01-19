@@ -145,15 +145,21 @@ static inline int normal_prio(struct task_struct *p)
 
 Izvorni kod modula za promenu prioriteta procesa dat je u direktorijumu `linux-kernel-module`. Nekoliko važnih komandi dato je u nastavku.
 
-`sudo insmod kernel_module.ko process_id=.. process_higher_priority =.. process_siblings =.. process_realtime ..`
+```sh
+$ sudo insmod kernel_module.ko process_id=.. process_higher_priority =.. process_siblings =.. process_realtime= ..
+```
 
 Za učitavanje modula potrebno je pozvati `insmod` komandu sa root privilegijama. Takođe treba navesti parametre modula, ako je ovo izostavljeno preuzimaju se podrazumevane vrednosti.
 
-`sudo rmmod kernel_module`
+```sh
+$ sudo rmmod kernel_module
+```
 
 Za brisanje modula potrebno je pozvati `rmmod` komandu.
 
-`dmesg`
+```sh
+$ dmesg
+```
 
 Za praćenje rezultata modula potrebno je pozvati `dmesg`. Sve akcije modula ispraćene su u logu kernela.
 
@@ -220,7 +226,9 @@ Na primeru je pokrenut proces Firefox pretraživača koji je pritom dobio PID 31
 
 Do ovog rezultata dolazi se učitavanjem modula kao:
 
-`sudo insmod kernel_module.ko process_id=3119 process_higher_priority=0 process_realtime=0 process_siblings=0`
+```sh
+$ sudo insmod kernel_module.ko process_id=3119 process_higher_priority=0 process_realtime=0 process_siblings=0
+```
 
 Rezultat se može videti na sledećoj slici. Po parametrima modula, promenama neće biti zahvećeni procesi "braća/sestre", prioritet će se smanjiti za jedan i proces neće dobiti real-time karakteristike.
 
@@ -318,7 +326,7 @@ $ sudo update-initramfs -c -k 5.4.12
 $ sudo update-grub
 ```
 
-`shutdown -r now` za ponovno podizanje sistema. Nakon pokretanja, kernel je promenjen i može se koristiti sistemski poziv.
+`$ shutdown -r now` za ponovno podizanje sistema. Nakon pokretanja, kernel je promenjen i može se koristiti sistemski poziv.
 
 ### Pozivanje api-a kernela
 
