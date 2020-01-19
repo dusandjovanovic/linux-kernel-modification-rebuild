@@ -146,7 +146,7 @@ static inline int normal_prio(struct task_struct *p)
 Izvorni kod modula za promenu prioriteta procesa dat je u direktorijumu `linux-kernel-module`. Nekoliko važnih komandi dato je u nastavku.
 
 ```sh
-$ sudo insmod kernel_module.ko process_id=# process_higher_priority=# process_siblings=# process_realtime=#
+$ sudo insmod kernel_module.ko process_id=$ process_higher_priority=$ process_siblings=$ process_realtime=$
 ```
 
 Za učitavanje modula potrebno je pozvati `insmod` komandu sa root privilegijama. Takođe treba navesti parametre modula, ako je ovo izostavljeno preuzimaju se podrazumevane vrednosti.
