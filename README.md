@@ -283,9 +283,40 @@ Nakon promene `menuconfig-a` kernel se može rebuild-ovati sa još jednim sistem
 
 Modifikovani kod kernela sa dodatim sistemskim pozivom nalazi se u [https://github.com/dusandjovanovic/linux-kernel-modification-rebuild/tree/master/linux-5.4.12](https://github.com/dusandjovanovic/linux-kernel-modification-rebuild/tree/master/linux-5.4.12).
 
-`make` komanda za pokretanje procesa kompajliranja.
+Pre build-ovanja kernela neophodno je izvršiti konfiguraciju kojom se određuje koju moduli kernela su potrebni. Najlakše je iskoristiti trenutnu konfiguraciju sistema, ako nema velike razlike u verzijama.
 
-`make modules_install install` komanda za instalaciju kernela.
+```sh
+$ cd linux-5.4.12
+$ cp -v /boot/config-$(uname -r) .config
+```
+
+Zatim, u slučaju da na sistemu nema potrebnih alata za proces kompajliranja treba pribaviti više njih.
+
+```sh
+$ sudo apt-get install build-essential libncurses-dev bison flex libssl-dev libelf-dev
+```
+
+Nakon završetka ovih neophodnih koraka može da se nastavi sa procesom rebuild-ovanja kernela.
+
+`$ sudo make menuconfig` za izbor detalja konfiguracije.
+
+`$ sudo make` komanda za pokretanje procesa kompajliranja kojom se dobija image kernela.
+
+`$ sudo make modules_install` komanda za instalaciju modula.
+
+`$ sudo make install` komanda za instalaciju kernela.
+
+Kao posledica biće dodate tri nove datoteke u /boot direktorijum, pored ovoga je promenjena i grub konfiguraciona datoteka.
+* initramfs-5.4.12.img
+* System.map-5.4.12
+* vmlinuz-5.4.12
+
+Na kraju, treba promeniti konfiguraciju grub bootloader-a i naznačiti novu verziju kernela.
+
+```sh
+$ sudo update-initramfs -c -k 5.4.12
+$ sudo update-grub
+```
 
 `shutdown -r now` za ponovno podizanje sistema. Nakon pokretanja, kernel je promenjen i može se koristiti sistemski poziv.
 
@@ -293,9 +324,9 @@ Modifikovani kod kernela sa dodatim sistemskim pozivom nalazi se u [https://gith
 
 Primer korišćenja sistemskog poziva iz korisničkog procesa dat je u [https://github.com/dusandjovanovic/linux-kernel-modification-rebuild/blob/master/linux-kernel-system-call/kernel_call_example.c](https://github.com/dusandjovanovic/linux-kernel-modification-rebuild/blob/master/linux-kernel-system-call/kernel_call_example.c).
 
-Na osnovu broja 436 sistemskog poziva, može se formirati makro koji se zatim koristi za pozivanje.
+`syscall` je funkcija biblioteke koja omogućava *invoke* sistemskog poziva čiji interfejs assembly jezika ima konkretan broj i odgovarajuće argumente. Ova funkcija čuva stanje svih registara pre poziva i vraća iste nakon završetka izvršenja. Simbolična konstanta koja određuje sistemski poziv je njegov broj (naveden u tabeli ranije). Na osnovu broja 436 sistemskog poziva, može se formirati makro koji se zatim koristi za pozivanje.
 
-U kodu je dat primer pokretanja sistemskog poziva za proces sa PID-om 2620 koji će uvećati njegov prioritet, imaće isti uticaj na sve procese "braću/sestre" i neće promeniti tip polise raspoređivanja u round robin real-time proces.
+U kodu je dat primer pokretanja sistemskog poziva za proces sa PID-om 2620 koji će uvećati njegov prioritet, imaće isti uticaj na sve procese "braću/sestre" i neće promeniti tip polise raspoređivanja u round robin real-time, odnosno `SCHED_RR`. Povratna vrednost 0 označava uspešan sistemski poziv. Vrednost -1 označava grešku, a kod greške je u tom slučaju sačuvan u `errno`.
 
 ```c
 #include <sys/syscall.h>
